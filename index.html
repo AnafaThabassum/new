@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .language-toggle {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .lang-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .lang-btn:hover, .lang-btn.active {
+            background: rgba(255,255,255,0.9);
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .disease-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .disease-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .disease-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            background: rgba(255,255,255,1);
+        }
+
+        .disease-image {
+            width: 100%;
+            height: 200px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            color: #666;
+        }
+
+        .disease-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .upload-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .chat-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .upload-btn, .camera-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upload-btn:hover, .camera-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .disease-details {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .disease-details.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-section {
+            margin-bottom: 25px;
+        }
+
+        .detail-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .detail-section p {
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        .back-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .disease-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chat-container {
+                flex-direction: column;
+            }
+            
+            .chat-input {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="main-title">🌱 Plant Disease Detection System</h1>
+            <p id="subtitle">AI-Powered Plant Health Monitoring</p>
+        </div>
+
+        <div class="language-toggle">
+            <button class="lang-btn active" onclick="switchLanguage('en')">English</button>
+            <button class="lang-btn" onclick="switchLanguage('ta')">தமிழ்</button>
+        </div>
+
+        <div id="main-content">
+            <div class="disease-grid">
+                <div class="disease-card" onclick="showDiseaseDetails(0)">
+                    <div class="disease-image">🍃</div>
+                    <h3 class="disease-name">Leaf Spot Disease</h3>
+                </div>
+                <div class="disease-card" onclick="showDiseaseDetails(1)">
+                    <div class="disease-image">🦠</div>
+                    <h3 class="disease-name">Powdery Mildew</h3>
+                </div>
+                <div class="disease-card" onclick="showDiseaseDetails(2)">
+                    <div class="disease-image">🌾</div>
+                    <h3 class="disease-name">Rice Blast</h3>
+                </div>
+                <div class="disease-card" onclick="showDiseaseDetails(3)">
+                    <div class="disease-image">🍅</div>
+                    <h3 class="disease-name">Tomato Blight</h3>
+                </div>
+                <div class="disease-card" onclick="showDiseaseDetails(4)">
+                    <div class="disease-image">🌽</div>
+                    <h3 class="disease-name">Corn Rust</h3>
+                </div>
+                <div class="disease-card" onclick="showDiseaseDetails(5)">
+                    <div class="disease-image">🥔</div>
+                    <h3 class="disease-name">Potato Late Blight</h3>
+                </div>
+            </div>
+
+            <div class="upload-section">
+                <h2 id="upload-title">Upload or Capture Plant Image</h2>
+                <div class="chat-container">
+                    <input type="text" class="chat-input" placeholder="Ask about plant diseases..." id="chat-input">
+                    <input type="file" id="file-input" class="file-input" accept="image/*" onchange="handleFileUpload(event)">
+                    <button class="upload-btn" onclick="document.getElementById('file-input').click()">
+                        📁 Upload Image
+                    </button>
+                    <button class="camera-btn" onclick="openCamera()">
+                        📷 Camera
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="disease-details" id="disease-details">
+            <button class="back-btn" onclick="goBack()">← Back</button>
+            <div id="disease-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentLanguage = 'en';
+        
+        const diseaseData = {
+            en: [
+                {
+                    name: "Leaf Spot Disease",
+                    causativeAgent: "Fungal pathogens (Alternaria, Cercospora species)",
+                    symptoms: "Dark brown or black circular spots on leaves, yellowing around spots, leaf drop in severe cases",
+                    prevention: "Ensure proper air circulation, avoid overhead watering, remove infected leaves, apply fungicide sprays",
+                    treatment: "Remove affected leaves, apply copper-based fungicides, improve drainage and reduce humidity",
+                    spread: "Spreads through water splash, wind, contaminated tools, and infected plant debris"
+                },
+                {
+                    name: "Powdery Mildew",
+                    causativeAgent: "Fungal pathogens (Erysiphe, Podosphaera species)",
+                    symptoms: "White powdery coating on leaves and stems, leaf distortion, stunted growth",
+                    prevention: "Maintain proper spacing between plants, ensure good air circulation, avoid high humidity",
+                    treatment: "Apply sulfur-based fungicides, use baking soda solution, remove infected parts",
+                    spread: "Spreads through airborne spores, thrives in high humidity and moderate temperatures"
+                },
+                {
+                    name: "Rice Blast",
+                    causativeAgent: "Magnaporthe oryzae (fungus)",
+                    symptoms: "Diamond-shaped lesions on leaves, neck rot, panicle blast, reduced grain yield",
+                    prevention: "Use resistant varieties, balanced fertilization, proper water management",
+                    treatment: "Apply systemic fungicides, remove infected plants, use silicon amendments",
+                    spread: "Spreads through wind-blown spores, water splash, and infected seeds"
+                },
+                {
+                    name: "Tomato Blight",
+                    causativeAgent: "Alternaria solani (Early Blight) / Phytophthora infestans (Late Blight)",
+                    symptoms: "Dark brown spots with concentric rings, yellowing leaves, fruit rot",
+                    prevention: "Crop rotation, proper spacing, mulching, drip irrigation instead of overhead watering",
+                    treatment: "Apply copper or chlorothalonil fungicides, remove infected plant parts",
+                    spread: "Spreads through water splash, wind, contaminated soil, and infected plant debris"
+                },
+                {
+                    name: "Corn Rust",
+                    causativeAgent: "Puccinia sorghi (Common Rust) / Puccinia polysora (Southern Rust)",
+                    symptoms: "Orange to reddish-brown pustules on leaves, yellowing and dying of leaves",
+                    prevention: "Plant resistant varieties, proper field sanitation, monitor weather conditions",
+                    treatment: "Apply triazole fungicides, remove infected plant debris",
+                    spread: "Spreads through wind-blown spores, favored by cool temperatures and high humidity"
+                },
+                {
+                    name: "Potato Late Blight",
+                    causativeAgent: "Phytophthora infestans (oomycete)",
+                    symptoms: "Dark water-soaked lesions on leaves, white fungal growth on undersides, tuber rot",
+                    prevention: "Use certified seed potatoes, proper spacing, avoid overhead irrigation",
+                    treatment: "Apply protective fungicides, remove infected plants immediately",
+                    spread: "Spreads rapidly through airborne spores in cool, moist conditions"
+                }
+            ],
+            ta: [
+                {
+                    name: "இலை புள்ளி நோய்",
+                    causativeAgent: "பூஞ்சை நோய்க்கிருமிகள் (அல்டர்னேரியா, செர்கோஸ்போரா வகைகள்)",
+                    symptoms: "இலைகளில் கருப்பு அல்லது பழுப்பு வட்ட புள்ளிகள், புள்ளிகள் சுற்றி மஞ்சள், கடுமையான நிலையில் இலை உதிர்வு",
+                    prevention: "சரியான காற்று சுழற்சி உறுதி, தலைக்கு மேல் நீர் பாய்ச்சுவதை தவிர்க்க, பாதிக்கப்பட்ட இலைகளை அகற்று, பூஞ்சைக் கொல்லி தெளிக்க",
+                    treatment: "பாதிக்கப்பட்ட இலைகளை அகற்று, செம்பு அடிப்படை பூஞ்சைக் கொல்லி பயன்படுत்து, வடிகால் மேம்படுத்து மற்றும் ஈரப்பதம் குறைக்க",
+                    spread: "நீர் தெளிப்பு, காற்று, மாசுபட்ட கருவிகள் மற்றும் பாதிக்கப்பட்ட தாவர குப்பைகள் மூலம் பரவுகிறது"
+                },
+                {
+                    name: "பொடி பூஞ்சை நோய்",
+                    causativeAgent: "பூஞ்சை நோய்க்கிருமிகள் (எரிசிஃபே, போடோஸ்ஃபேரா வகைகள்)",
+                    symptoms: "இலைகள் மற்றும் தண்டுகளில் வெள்ளை பொடி பூச்சு, இலை சிதைவு, வளர்ச்சி தடை",
+                    prevention: "தாவரங்களுக்கு இடையே சரியான இடைவெளி பராமரி, நல்ல காற்று சுழற்சி உறுதி, அதிக ஈரப்பதம் தவிர்க்க",
+                    treatment: "கந்தக அடிப்படை பூஞ்சைக் கொல்லி பயன்படுத்து, பேக்கிங் சோடா கரைசல் பயன்படுத்து, பாதிக்கப்பட்ட பகுதிகளை அகற்று",
+                    spread: "காற்றில் பரவும் வித்துகள் மூலம் பரவுகிறது, அதிக ஈரப்பதம் மற்றும் மிதமான வெப்பநிலையில் செழிக்கிறது"
+                },
+                {
+                    name: "நெல் வெடிப்பு நோய்",
+                    causativeAgent: "மேக்னபோர்த்தே ஓரைசே (பூஞ்சை)",
+                    symptoms: "இலைகளில் வைர வடிவ காயங்கள், கழுத்து அழுகல், கதிர் வெடிப்பு, தானிய விளைச்சல் குறைவு",
+                    prevention: "எதிர்ப்பு வகைகள் பயன்படுத்து, சமநிலையான உரமிடுதல், சரியான நீர் மேலாண்மை",
+                    treatment: "முறையான பூஞ்சைக் கொல்லி பயன்படுத்து, பாதிக்கப்பட்ட தாவரங்களை அகற்று, சிலிக்கான் சேர்க்கைகள் பயன்படுத்து",
+                    spread: "காற்றில் பறக்கும் வித்துகள், நீர் தெளிப்பு மற்றும் பாதிக்கப்பட்ட விதைகள் மூலம் பரவுகிறது"
+                },
+                {
+                    name: "தக்காளி கருகல் நோய்",
+                    causativeAgent: "அல்டர்னேரியா சோலானி (முன்கூட்டிய கருகல்) / ஃபைட்டோஃப்தோரா இன்ஃபெஸ்டன்ஸ் (தாமத கருகல்)",
+                    symptoms: "செறிவான வளையங்களுடன் கருப்பு பழுப்பு புள்ளிகள், மஞ்சள் இலைகள், பழ அழுகல்",
+                    prevention: "பயிர் சுழற்சி, சரியான இடைவெளி, மல்ச்சிங், தலைக்கு மேல் நீர்ப்பாசனம் பதிலாக துளி நீர்ப்பாசனம்",
+                    treatment: "செம்பு அல்லது குளோரோதலோனில் பூஞ்சைக் கொல்லி பயன்படுத்து, பாதிக்கப்பட்ட தாவர பாகங்களை அகற்று",
+                    spread: "நீர் தெளிப்பு, காற்று, மாசுபட்ட மண் மற்றும் பாதிக்கப்பட்ட தாவர குப்பைகள் மூலம் பரவுகிறது"
+                },
+                {
+                    name: "சோள துரு நோய்",
+                    causativeAgent: "பக்சீனியா சோர்கி (பொதுவான துரு) / பக்சீனியா பாலிசோரா (தெற்கு துரu)",
+                    symptoms: "இலைகளில் ஆரஞ்சு முதல் சிவப்பு-பழுப்பு புஸ்டுல்கள், இலைகள் மஞ்சள் மற்றும் இறப்பு",
+                    prevention: "எதிர்ப்பு வகைகள் நடவு, சரியான வயல் சுத்தம், வானிலை நிலைமைகள் கண்காணிப்பு",
+                    treatment: "டிரையசோல் பூஞ்சைக் கொல்லி பயன்படுத்து, பாதிக்கப்பட்ட தாவர குப்பைகளை அகற்று",
+                    spread: "காற்றில் பறக்கும் வித்துகள் மூலம் பரவுகிறது, குளிர் வெப்பநிலை மற்றும் அதிக ஈரப்பதத்தால் ஆதரிக்கப்படுகிறது"
+                },
+                {
+                    name: "உருளைக்கிழங்கு தாமத கருகல்",
+                    causativeAgent: "ஃபைட்டோஃப்தோரா இன்ஃபெஸ்டன்ஸ் (ஊமைசீட்)",
+                    symptoms: "இலைகளில் கருண்ட நீர்-நனைந்த காயங்கள், கீழ் பக்கத்தில் வெள்ளை பூஞ்சை வளர்ச்சி, கிழங்கு அழுகல்",
+                    prevention: "சான்றிதழ் விதை உருளைக்கிழங்கு பயன்படுத்து, சரியான இடைவெளி, தலைக்கு மேல் நீர்ப்பாசனம் தவிர்க்க",
+                    treatment: "பாதுகாப்பு பூஞ்சைக் கொல்லி பயன்படுத்து, பாதிக்கப்பட்ட தாவரங்களை உடனே அகற்று",
+                    spread: "குளிர், ஈரமான நிலைமைகளில் காற்றில் பரவும் வித்துகள் மூலம் வேகமாக பரவுகிறது"
+                }
+            ]
+        };
+
+        const translations = {
+            en: {
+                mainTitle: "🌱 Plant Disease Detection System",
+                subtitle: "AI-Powered Plant Health Monitoring",
+                uploadTitle: "Upload or Capture Plant Image",
+                chatPlaceholder: "Ask about plant diseases...",
+                uploadBtn: "📁 Upload Image",
+                cameraBtn: "📷 Camera",
+                causativeAgent: "Causative Agent",
+                symptoms: "Symptoms",
+                prevention: "Prevention",
+                treatment: "Treatment",
+                spread: "How it Spreads",
+                back: "← Back"
+            },
+            ta: {
+                mainTitle: "🌱 தாவர நோய் கண்டறிதல் அமைப்பு",
+                subtitle: "செயற்கை நுண்ணறிவு சக்தியால் இயங்கும் தாவர ஆரோக்கியம் கண்காணிப்பு",
+                uploadTitle: "தாவர படத்தை பதிவேற்று அல்லது எடுக்கவும்",
+                chatPlaceholder: "தாவர நோய்களைப் பற்றி கேட்கவும்...",
+                uploadBtn: "📁 படம் பதிவேற்று",
+                cameraBtn: "📷 கேமரா",
+                causativeAgent: "நோய்க்கிருமி",
+                symptoms: "அறிகுறிகள்",
+                prevention: "தடுப்பு",
+                treatment: "சிகிச்சை",
+                spread: "எவ்வாறு பரவுகிறது",
+                back: "← பின்னால்"
+            }
+        };
+
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update active button
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update UI elements
+            document.getElementById('main-title').textContent = translations[lang].mainTitle;
+            document.getElementById('subtitle').textContent = translations[lang].subtitle;
+            document.getElementById('upload-title').textContent = translations[lang].uploadTitle;
+            document.getElementById('chat-input').placeholder = translations[lang].chatPlaceholder;
+            
+            // Update disease names
+            const diseaseNames = document.querySelectorAll('.disease-name');
+            diseaseNames.forEach((name, index) => {
+                name.textContent = diseaseData[lang][index].name;
+            });
+            
+            // Update button texts
+            document.querySelector('.upload-btn').innerHTML = translations[lang].uploadBtn;
+            document.querySelector('.camera-btn').innerHTML = translations[lang].cameraBtn;
+        }
+
+        function showDiseaseDetails(index) {
+            const disease = diseaseData[currentLanguage][index];
+            const detailsHTML = `
+                <h2>${disease.name}</h2>
+                <div class="detail-section">
+                    <h3>${translations[currentLanguage].causativeAgent}</h3>
+                    <p>${disease.causativeAgent}</p>
+                </div>
+                <div class="detail-section">
+                    <h3>${translations[currentLanguage].symptoms}</h3>
+                    <p>${disease.symptoms}</p>
+                </div>
+                <div class="detail-section">
+                    <h3>${translations[currentLanguage].prevention}</h3>
+                    <p>${disease.prevention}</p>
+                </div>
+                <div class="detail-section">
+                    <h3>${translations[currentLanguage].treatment}</h3>
+                    <p>${disease.treatment}</p>
+                </div>
+                <div class="detail-section">
+                    <h3>${translations[currentLanguage].spread}</h3>
+                    <p>${disease.spread}</p>
+                </div>
+            `;
+            
+            document.getElementById('disease-content').innerHTML = detailsHTML;
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('disease-details').classList.add('active');
+        }
+
+        function goBack() {
+            document.getElementById('disease-details').classList.remove('active');
+            document.getElementById('main-content').style.display = 'block';
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                alert(`File uploaded: ${file.name}\nThis would normally be processed by AI for disease detection.`);
+            }
+        }
+
+        function openCamera() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                alert("Camera access would be implemented here for real-time disease detection.");
+            } else {
+                alert("Camera access not supported on this device.");
+            }
+        }
+
+        // Chat functionality
+        document.getElementById('chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value;
+                if (query.trim()) {
+                    alert(`AI Response: This would analyze your query "${query}" and provide relevant plant disease information.`);
+                    this.value = '';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
