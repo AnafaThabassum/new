@@ -75,6 +75,8 @@
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
         }
 
         .disease-card:hover {
@@ -86,20 +88,69 @@
         .disease-image {
             width: 100%;
             height: 200px;
-            background: #f0f0f0;
             border-radius: 10px;
             margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3em;
-            color: #666;
+            overflow: hidden;
+            position: relative;
+            background: #f0f0f0;
+        }
+
+        .disease-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+        }
+
+
+        .disease-card:hover .disease-image img {
+            transform: scale(1.05);
         }
 
         .disease-card h3 {
             font-size: 1.3em;
             margin-bottom: 10px;
             color: #333;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .analysis-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(102, 126, 234, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .analysis-overlay.active {
+            opacity: 1;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .upload-section {
@@ -237,29 +288,70 @@
 
         <div id="main-content">
             <div class="disease-grid">
-                <div class="disease-card" onclick="showDiseaseDetails(0)">
-                    <div class="disease-image">🍃</div>
-                    <h3 class="disease-name">Leaf Spot Disease</h3>
+                <div class="disease-card" onclick="analyzeDiseaseCard(0, this)">
+                    <div class="disease-image">
+                        <img src="images/leaf-spot.jpg" alt="Leaf Spot Disease" id="disease-img-0">
+
+                    </div>
+                    <h3 class="disease-name"></h3>
+                    <div class="analysis-overlay">
+                        <div class="spinner"></div>
+                        <div class="analysis-text">Analyzing...</div>
+                    </div>
                 </div>
-                <div class="disease-card" onclick="showDiseaseDetails(1)">
-                    <div class="disease-image">🦠</div>
-                    <h3 class="disease-name">Powdery Mildew</h3>
+                <div class="disease-card" onclick="analyzeDiseaseCard(1, this)">
+                    <div class="disease-image">
+                        <img src="images/powdery-mildew.jpg" alt="Powdery Mildew" id="disease-img-1">
+
+                    </div>
+                    <h3 class="disease-name"></h3>
+                    <div class="analysis-overlay">
+                        <div class="spinner"></div>
+                        <div class="analysis-text">Analyzing...</div>
+                    </div>
                 </div>
-                <div class="disease-card" onclick="showDiseaseDetails(2)">
-                    <div class="disease-image">🌾</div>
-                    <h3 class="disease-name">Rice Blast</h3>
+                <div class="disease-card" onclick="analyzeDiseaseCard(2, this)">
+                    <div class="disease-image">
+                        <img src="images/rice-blast.jpg" alt="Rice Blast" id="disease-img-2">
+
+                    </div>
+                    <h3 class="disease-name"></h3>
+                    <div class="analysis-overlay">
+                        <div class="spinner"></div>
+                        <div class="analysis-text">Analyzing...</div>
+                    </div>
                 </div>
-                <div class="disease-card" onclick="showDiseaseDetails(3)">
-                    <div class="disease-image">🍅</div>
-                    <h3 class="disease-name">Tomato Blight</h3>
+                <div class="disease-card" onclick="analyzeDiseaseCard(3, this)">
+                    <div class="disease-image">
+                        <img src="images/tomato-blight.jpg" alt="Tomato Blight" id="disease-img-3">
+
+                    </div>
+                    <h3 class="disease-name"></h3>
+                    <div class="analysis-overlay">
+                        <div class="spinner"></div>
+                        <div class="analysis-text">Analyzing...</div>
+                    </div>
                 </div>
-                <div class="disease-card" onclick="showDiseaseDetails(4)">
-                    <div class="disease-image">🌽</div>
-                    <h3 class="disease-name">Corn Rust</h3>
+                <div class="disease-card" onclick="analyzeDiseaseCard(4, this)">
+                    <div class="disease-image">
+                        <img src="images/corn-rust.jpg" alt="Corn Rust" id="disease-img-4">
+
+                    </div>
+                    <h3 class="disease-name"></h3>
+                    <div class="analysis-overlay">
+                        <div class="spinner"></div>
+                        <div class="analysis-text">Analyzing...</div>
+                    </div>
                 </div>
-                <div class="disease-card" onclick="showDiseaseDetails(5)">
-                    <div class="disease-image">🥔</div>
+                <div class="disease-card" onclick="analyzeDiseaseCard(5, this)">
+                    <div class="disease-image">
+                        <img src="images/potato-blight.jpg" alt="Potato Late Blight" id="disease-img-5">
+                    </div>
                     <h3 class="disease-name">Potato Late Blight</h3>
+                    <div class="analysis-overlay">
+                        <div class="spinner"></div>
+                        <div class="analysis-text">Analyzing...</div>
+                    </div>
                 </div>
             </div>
 
@@ -286,6 +378,78 @@
 
     <script>
         let currentLanguage = 'en';
+        
+        // Disease images data URLs (the uploaded images)
+        const diseaseImages = {
+            0: `${window.fs ? '' : 'data:image/jpeg;base64,'}`, // Will be populated with actual images
+            1: `${window.fs ? '' : 'data:image/jpeg;base64,'}`,
+            2: `${window.fs ? '' : 'data:image/jpeg;base64,'}`,
+            3: `${window.fs ? '' : 'data:image/jpeg;base64,'}`,
+            4: `${window.fs ? '' : 'data:image/jpeg;base64,'}`,
+            5: `${window.fs ? '' : 'data:image/jpeg;base64,'}`
+        };
+
+        // Load images when page loads
+        window.addEventListener('load', async function() {
+            try {
+                if (window.fs && window.fs.readFile) {
+                    // Try to load the uploaded images
+                    const imageFiles = [
+                        'Image 1:', 'Image 2:', 'Image 3:', 'Image 4:', 'Image 5:', 'Image 6:'
+                    ];
+                    
+                    for (let i = 0; i < imageFiles.length; i++) {
+                        try {
+                            // Note: This would need the actual file names from the uploaded images
+                            // For now, we'll use placeholder images
+                            loadPlaceholderImage(i);
+                        } catch (error) {
+                            console.log(`Could not load image ${i + 1}:`, error);
+                            loadPlaceholderImage(i);
+                        }
+                    }
+                } else {
+                    // Load placeholder images for all cards
+                    /*
+                    for (let i = 0; i < 6; i++) {
+                        loadPlaceholderImage(i);
+                    } */ 
+                }
+            } catch (error) {
+                console.log('Error loading images:', error);
+                // Load placeholder images as fallback
+                for (let i = 0; i < 6; i++) {
+                    loadPlaceholderImage(i);
+                }
+            }
+        });
+
+        function loadPlaceholderImage(index) {
+            // Create placeholder images with disease-specific colors
+            const colors = ['#4CAF50', '#FF9800', '#2196F3', '#F44336', '#FF5722', '#795548'];
+            const emojis = ['🍃', '🦠', '🌾', '🍅', '🌽', '🥔'];
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 200;
+            const ctx = canvas.getContext('2d');
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 300, 200);
+            gradient.addColorStop(0, colors[index]);
+            gradient.addColorStop(1, colors[index] + '80');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 300, 200);
+            
+            // Add emoji
+            ctx.font = '60px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'white';
+            ctx.fillText(emojis[index], 150, 120);
+            
+            document.getElementById(`disease-img-${index}`).src = canvas.toDataURL();
+        }
         
         const diseaseData = {
             en: [
@@ -344,7 +508,7 @@
                     causativeAgent: "பூஞ்சை நோய்க்கிருமிகள் (அல்டர்னேரியா, செர்கோஸ்போரா வகைகள்)",
                     symptoms: "இலைகளில் கருப்பு அல்லது பழுப்பு வட்ட புள்ளிகள், புள்ளிகள் சுற்றி மஞ்சள், கடுமையான நிலையில் இலை உதிர்வு",
                     prevention: "சரியான காற்று சுழற்சி உறுதி, தலைக்கு மேல் நீர் பாய்ச்சுவதை தவிர்க்க, பாதிக்கப்பட்ட இலைகளை அகற்று, பூஞ்சைக் கொல்லி தெளிக்க",
-                    treatment: "பாதிக்கப்பட்ட இலைகளை அகற்று, செம்பு அடிப்படை பூஞ்சைக் கொல்லி பயன்படுत்து, வடிகால் மேம்படுத்து மற்றும் ஈரப்பதம் குறைக்க",
+                    treatment: "பாதிக்கப்பட்ட இலைகளை அகற்று, செம்பு அடிப்படை பூஞ்சைக் கொல்லி பயன்படுத்து, வடிகால் மேம்படுத்து மற்றும் ஈரப்பதம் குறைக்க",
                     spread: "நீர் தெளிப்பு, காற்று, மாசுபட்ட கருவிகள் மற்றும் பாதிக்கப்பட்ட தாவர குப்பைகள் மூலம் பரவுகிறது"
                 },
                 {
@@ -373,7 +537,7 @@
                 },
                 {
                     name: "சோள துரு நோய்",
-                    causativeAgent: "பக்சீனியா சோர்கி (பொதுவான துரு) / பக்சீனியா பாலிசோரா (தெற்கு துரu)",
+                    causativeAgent: "பக்சீனியா சோர்கி (பொதுவான துரு) / பக்சீனியா பாலிசோரா (தெற்கு துரு)",
                     symptoms: "இலைகளில் ஆரஞ்சு முதல் சிவப்பு-பழுப்பு புஸ்டுல்கள், இலைகள் மஞ்சள் மற்றும் இறப்பு",
                     prevention: "எதிர்ப்பு வகைகள் நடவு, சரியான வயல் சுத்தம், வானிலை நிலைமைகள் கண்காணிப்பு",
                     treatment: "டிரையசோல் பூஞ்சைக் கொல்லி பயன்படுத்து, பாதிக்கப்பட்ட தாவர குப்பைகளை அகற்று",
@@ -403,7 +567,9 @@
                 prevention: "Prevention",
                 treatment: "Treatment",
                 spread: "How it Spreads",
-                back: "← Back"
+                back: "← Back",
+                analyzing: "Analyzing...",
+                predicting: "Predicting..."
             },
             ta: {
                 mainTitle: "🌱 தாவர நோய் கண்டறிதல் அமைப்பு",
@@ -417,7 +583,9 @@
                 prevention: "தடுப்பு",
                 treatment: "சிகிச்சை",
                 spread: "எவ்வாறு பரவுகிறது",
-                back: "← பின்னால்"
+                back: "← பின்னால்",
+                analyzing: "பகுப்பாய்வு செய்கிறது...",
+                predicting: "முன்னறிவிக்கிறது..."
             }
         };
 
@@ -443,6 +611,30 @@
             // Update button texts
             document.querySelector('.upload-btn').innerHTML = translations[lang].uploadBtn;
             document.querySelector('.camera-btn').innerHTML = translations[lang].cameraBtn;
+        }
+
+        function analyzeDiseaseCard(index, cardElement) {
+            const overlay = cardElement.querySelector('.analysis-overlay');
+            const analysisText = cardElement.querySelector('.analysis-text');
+            const diseaseName = cardElement.querySelector('.disease-name');
+            
+            // Hide disease name and show overlay
+            diseaseName.style.opacity = '0';
+            overlay.classList.add('active');
+            
+            // Start analyzing phase
+            analysisText.textContent = translations[currentLanguage].analyzing;
+            
+            setTimeout(() => {
+                // Switch to predicting phase after 2.5 seconds
+                analysisText.textContent = translations[currentLanguage].predicting;
+                
+                setTimeout(() => {
+                    // Hide overlay and show disease details after another 2.5 seconds
+                    overlay.classList.remove('active');
+                    showDiseaseDetails(index);
+                }, 2500);
+            }, 2500);
         }
 
         function showDiseaseDetails(index) {
@@ -479,6 +671,11 @@
         function goBack() {
             document.getElementById('disease-details').classList.remove('active');
             document.getElementById('main-content').style.display = 'block';
+            
+            // Reset all disease name visibility
+            document.querySelectorAll('.disease-name').forEach(name => {
+                name.style.opacity = '1';
+            });
         }
 
         function handleFileUpload(event) {
@@ -506,6 +703,23 @@
                 }
             }
         });
+
+        // Function to convert uploaded files to data URLs for the images
+        async function loadActualImages() {
+            // This function would be called to load the actual uploaded images
+            // For now, we'll use the placeholder images created in loadPlaceholderImage()
+            const imageFilenames = [
+                'leaf-spot.jpg',    // Image 1 - circular spots
+                'rice-blast.jpg',   // Image 2 - elongated lesions on grass-like leaf  
+                'tomato-blight.jpg', // Image 3 - yellowing and browning
+                'powdery-mildew.jpg', // Image 4 - white powdery coating
+                'corn-rust.jpg',    // Image 5 - orange pustules
+                'potato-blight.jpg' // Image 6 - brown withered foliage
+            ];
+            
+            // In a real implementation, you would load these images from the uploaded files
+            // For demonstration, the placeholder images will be used
+        }
     </script>
 </body>
 </html>
